@@ -6,6 +6,10 @@ Currently uses an included schema.json file from github.
 
 __Extremely early alpha__
 
+![alt text](https://github.com/andyvajda/graphql-vis/blob/master/image.png "Graph")
+
+![alt text](https://github.com/andyvajda/graphql-vis/blob/master/image+.png "Zoomed in graph")
+
 ## Getting started
 
 Either `yarn` or `npm i`
