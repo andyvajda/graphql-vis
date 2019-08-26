@@ -3,6 +3,9 @@
   <div>Edges: {{edgeList.length}}</div>
   <hr />
   <div id="status" #status>{{this.statusMessage}}</div>
+  <div>Physics enabled? <input type="checkbox" [checked]="physicsEnabled" (change)="this.physicsEnabled = !this.physicsEnabled;this.network.setOptions( { physics: this.physicsEnabled } );" /></div>
+  <div>Show fields? <input type="checkbox" [checked]="showFields" (change)="this.showFields = !this.showFields; this.init();" /></div>
+  <div>Stabilization Iterations: <input id="stabilization" #stabilization type="number" [value]="stabilizationIterations" (input)="stabilizationIterations = $event.target.value; this.init();" /></div>
 </div>
 <div id="container" #container></div>
 <router-outlet></router-outlet>

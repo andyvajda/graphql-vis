@@ -36,17 +36,25 @@ export class AppComponent implements AfterViewInit {
     { name: "Interface", icon: "\uf1c0", color: "#fcba2a"}
   ];
   
+  physicsEnabled: boolean = false;
   showFields: boolean = false;
   showInterfaces: boolean = false;
-
-  constructor() { 
-  }
+  stabilizationIterations: number = 600;
 
   ngAfterViewInit() {
+    this.init();
+  }
+
+  init() {
+    this.initLists();
     this.getTypes();
     this.getNetwork();
   }
 
+  initLists() {
+    this.nodeList = [];
+    this.edgeList = [];
+  }
   getTypes() {
     this.statusMessage = "Generating network...";
     const types: any[] = schema.data.__schema.types;
@@ -101,12 +109,12 @@ export class AppComponent implements AfterViewInit {
           if (this.showFields) {
             this.nodeList.push(this.createNode(field, node.name + "_" + field.name, field.name, "Field"));
             this.edgeList.push(this.createEdge(node.id, field.id));
-          } else {
-            const edges = this.nodeList.filter(x => this.isOfType(x.name, field.type));
-            edges.forEach(edge => {
-              this.edgeList.push(this.createEdge(node.id, edge.id));
-            });            
           }
+          const edges = this.nodeList.filter(x => this.isOfType(x.name, field.type));
+          edges.forEach(edge => {
+            this.edgeList.push(this.createEdge(node.id, edge.id));
+          });            
+        
         });
       }
 
@@ -139,6 +147,8 @@ export class AppComponent implements AfterViewInit {
     return obj;
   }
 
+  // id: id of the node you want to create an edge from
+  // typeObj: obj containing the type information used to compare other objects against.
   createEdges(id:string, typeObj:any) {
     const edges = this.nodeList.filter(x => this.isOfType(x.name, typeObj));
     edges.forEach(edge => {
@@ -214,7 +224,6 @@ export class AppComponent implements AfterViewInit {
     const el: ElementRef = this.el;
     const container: HTMLElement = el.nativeElement;
     this.network = new Network(container, data, this.getOptions());
-    // this.generateClusters();
 
     // network events
     this.network.on("selectNode", function(params) {
@@ -241,7 +250,7 @@ export class AppComponent implements AfterViewInit {
     this.network.on("stabilizationIterationsDone", () => {
       this.statusMessage = "Stabilization Iterations Done! Duration: " + moment.duration(moment().diff(this.stabilizationStart, 'seconds', true)) + "s";
       console.log(this.statusMessage);
-      this.network.setOptions( { physics: false } );
+      this.network.setOptions( { physics: this.physicsEnabled } );
     });
     return this.network;
   }
@@ -261,7 +270,7 @@ export class AppComponent implements AfterViewInit {
         solver: "forceAtlas2Based",
         stabilization: {
           enabled: true,
-          iterations: 600
+          iterations: this.stabilizationIterations
         }
       },
       layout: {
