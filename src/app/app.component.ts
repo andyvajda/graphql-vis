@@ -1,9 +1,8 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
-import { Network, Data, DataSet, ClusterOptions } from "vis";
-import { ElementRef } from "@angular/core";
+import { Component, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Network, Data, DataSet, ClusterOptions, NodeOptions } from "vis";
 import { schema } from "../../schemas/github.schema";
 import * as moment from "moment";
-import { NodeOptions } from 'vis';
+import { StorageService } from './storage.service';
 
 @Component({
   selector: 'app-root',
@@ -12,8 +11,8 @@ import { NodeOptions } from 'vis';
   '../assets/css/font-awesome-all-5.8.1.min.css']
 })
 export class AppComponent implements AfterViewInit {
-  @ViewChild("container") el: ElementRef;
-  title = 'vis-schema';
+  @ViewChild("container", { static: false }) el: ElementRef;
+  title = 'graphql-vis';
   
   nodes: DataSet<any>;
   edges: DataSet<any>;
@@ -21,6 +20,8 @@ export class AppComponent implements AfterViewInit {
 
   nodeList: any[] = [];
   edgeList: any[] = [];
+
+  hasSavedPositions: boolean;
 
   stabilizationStart: moment.Moment;
   lastStabilizationProgress: moment.Moment;
@@ -41,6 +42,7 @@ export class AppComponent implements AfterViewInit {
   showInterfaces: boolean = false;
   stabilizationIterations: number = 600;
 
+  constructor(private storage: StorageService) { }
   ngAfterViewInit() {
     this.init();
   }
@@ -134,6 +136,7 @@ export class AppComponent implements AfterViewInit {
       }
     });
 
+    this.loadNodePositions();
     this.nodes = new DataSet<any>(this.nodeList);
     this.edges = new DataSet<any>(this.edgeList);
     this.generateNodeConfig();
@@ -234,25 +237,47 @@ export class AppComponent implements AfterViewInit {
       }
     });
     this.network.on("animationFinished", () => console.log("Animation Finished"));
-    this.network.on("startStabilizing", () => {
-      this.stabilizationStart = moment(new Date());
-      this.statusMessage = "Stabilization Started: " + this.stabilizationStart.format("YYYY-MM-DD HH:mm:ss");
-      console.log(this.statusMessage);
-    });
-    this.network.on("stabilizationProgress", (progress) => {
-      if (!this.lastStabilizationProgress) {
-        this.lastStabilizationProgress = this.stabilizationStart;
-      }
-      this.statusMessage = "Stabiliztion Progress: " + progress.iterations + " of " + progress.total + " (" + moment.duration(moment(new Date()).diff(this.lastStabilizationProgress, 'seconds', true)) + "s)";
-      console.log(this.statusMessage);
-      this.lastStabilizationProgress = moment(new Date());
-    });
-    this.network.on("stabilizationIterationsDone", () => {
-      this.statusMessage = "Stabilization Iterations Done! Duration: " + moment.duration(moment().diff(this.stabilizationStart, 'seconds', true)) + "s";
-      console.log(this.statusMessage);
-      this.network.setOptions( { physics: this.physicsEnabled } );
-    });
+    if (!this.hasSavedPositions) {
+      this.network.on("startStabilizing", () => {
+        this.stabilizationStart = moment(new Date());
+        this.statusMessage = "Stabilization Started: " + this.stabilizationStart.format("YYYY-MM-DD HH:mm:ss");
+        console.log(this.statusMessage);
+      });
+      this.network.on("stabilizationProgress", (progress) => {
+        if (!this.lastStabilizationProgress) {
+          this.lastStabilizationProgress = this.stabilizationStart;
+        }
+        this.statusMessage = "Stabiliztion Progress: " + progress.iterations + " of " + progress.total + " (" + moment.duration(moment(new Date()).diff(this.lastStabilizationProgress, 'seconds', true)) + "s)";
+        console.log(this.statusMessage);
+        this.lastStabilizationProgress = moment(new Date());
+      });
+      this.network.on("stabilizationIterationsDone", () => {
+        this.statusMessage = "Stabilization Iterations Done! Duration: " + moment.duration(moment().diff(this.stabilizationStart, 'seconds', true)) + "s";
+        console.log(this.statusMessage);
+      });
+    }
+    this.saveNodePositions();
+    this.network.setOptions( { physics: this.physicsEnabled } );
     return this.network;
+  }
+
+  saveNodePositions() {
+    var n = this.objectToArray(this.network.getPositions());
+    this.storage.set('node-positions', n);
+  }
+
+  loadNodePositions() {
+    const positions: any = this.storage.get('node-positions');
+    if (positions) {
+      this.hasSavedPositions = true;
+      this.nodeList.map(node => {
+        const n = positions.find(pos => pos.id === node.id);
+        if (n) {
+          node.x = n.x;
+          node.y = n.y;
+        }
+      });
+    }
   }
 
   getOptions() {
@@ -328,5 +353,12 @@ export class AppComponent implements AfterViewInit {
         },
       }
     }
+  }
+  
+  objectToArray(obj) {
+    return Object.keys(obj).map(function (key) {
+      obj[key].id = key;
+      return obj[key];
+    });
   }
 }

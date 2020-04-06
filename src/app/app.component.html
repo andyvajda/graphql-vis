@@ -7,5 +7,8 @@
   <div>Show fields? <input type="checkbox" [checked]="showFields" (change)="this.showFields = !this.showFields; this.init();" /></div>
   <div>Stabilization Iterations: <input id="stabilization" #stabilization type="number" [value]="stabilizationIterations" (input)="stabilizationIterations = $event.target.value; this.init();" /></div>
 </div>
+<div id="controlpanelbuttons" #controlpanelbuttons>
+  <button (click)="saveNodePositions()">Save</button>
+</div>
 <div id="container" #container></div>
 <router-outlet></router-outlet>

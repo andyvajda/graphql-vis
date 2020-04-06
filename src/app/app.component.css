@@ -18,6 +18,17 @@
     padding: 2px 4px;
     z-index: 2;
 }
+#controlpanelbuttons {
+    position: absolute;
+    top: 265px;
+    left: 15px;
+    height: 32px;
+    width: 250px;
+    border: 1px solid grey;
+    background-color: cornflowerblue;
+    padding: 2px 4px;
+    z-index: 2;
+}
 
 #status {
     font-size: 0.8em;
