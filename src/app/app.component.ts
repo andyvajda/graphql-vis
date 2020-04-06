@@ -44,6 +44,7 @@ export class AppComponent implements AfterViewInit {
 
   constructor(private storage: StorageService) { }
   ngAfterViewInit() {
+    this.loadSettings();
     this.init();
   }
 
@@ -237,6 +238,7 @@ export class AppComponent implements AfterViewInit {
       }
     });
     this.network.on("animationFinished", () => console.log("Animation Finished"));
+    this.network.setOptions( { physics: false } );
     if (!this.hasSavedPositions) {
       this.network.on("startStabilizing", () => {
         this.stabilizationStart = moment(new Date());
@@ -256,14 +258,26 @@ export class AppComponent implements AfterViewInit {
         console.log(this.statusMessage);
       });
     }
-    this.saveNodePositions();
     this.network.setOptions( { physics: this.physicsEnabled } );
     return this.network;
+  }
+
+  save() {
+    this.saveNodePositions();
+    this.saveSettings();
   }
 
   saveNodePositions() {
     var n = this.objectToArray(this.network.getPositions());
     this.storage.set('node-positions', n);
+    this.network.storePositions();
+  }
+
+  saveSettings() {
+    this.storage.set('vis-settings', { 
+      showFields: this.showFields, 
+      physicsEnabled: this.physicsEnabled 
+    });
   }
 
   loadNodePositions() {
@@ -278,6 +292,12 @@ export class AppComponent implements AfterViewInit {
         }
       });
     }
+  }
+  
+  loadSettings() {
+    const settings: any = this.storage.get('vis-settings');
+    this.physicsEnabled = settings.physicsEnabled;
+    this.showFields = settings.showFields;
   }
 
   getOptions() {

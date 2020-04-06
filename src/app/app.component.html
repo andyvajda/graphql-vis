@@ -8,7 +8,7 @@
   <div>Stabilization Iterations: <input id="stabilization" #stabilization type="number" [value]="stabilizationIterations" (input)="stabilizationIterations = $event.target.value; this.init();" /></div>
 </div>
 <div id="controlpanelbuttons" #controlpanelbuttons>
-  <button (click)="saveNodePositions()">Save</button>
+  <button (click)="save()">Save</button>
 </div>
 <div id="container" #container></div>
 <router-outlet></router-outlet>
