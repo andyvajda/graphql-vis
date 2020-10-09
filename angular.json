@@ -25,9 +25,7 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": [
-            ],
-            "es5BrowserSupport": true
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -133,5 +131,8 @@
       }
     }
   },
-  "defaultProject": "graphql-vis"
+  "defaultProject": "graphql-vis",
+  "cli": {
+    "analytics": false
+  }
 }

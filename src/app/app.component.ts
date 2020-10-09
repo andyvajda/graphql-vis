@@ -1,5 +1,7 @@
 import { Component, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
-import { Network, Data, DataSet, ClusterOptions, NodeOptions } from "vis";
+import { DataSet } from "vis-data/peer";
+import { Data, Network, ClusterOptions, NodeOptions } from "vis-network/peer"
+import "vis-network/styles/vis-network.css";
 import { schema } from "../../schemas/github.schema";
 import * as moment from "moment";
 import { StorageService } from './storage.service';
